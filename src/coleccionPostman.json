@@ -1,0 +1,701 @@
+{
+	"info": {
+		"_postman_id": "your_collection_id_here",
+		"name": "JWT NestJS API - Complete",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Autenticación y Usuarios",
+			"item": [
+				{
+					"name": "POST /register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"register"
+							]
+						},
+						"description": "Registra un nuevo usuario en la API. Por defecto, puede asignarsele el rol 'user' si existe."
+					},
+					"response": []
+				},
+				{
+					"name": "POST /login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has accessToken\", function () {",
+									"    pm.expect(responseJson.accessToken).to.be.a('string');",
+									"});",
+									"",
+									"pm.test(\"Response has refreshToken\", function () {",
+									"    pm.expect(responseJson.refreshToken).to.be.a('string');",
+									"});",
+									"",
+									"// Guardar tokens como variables de entorno de Postman",
+									"pm.environment.set(\"accessToken\", responseJson.accessToken);",
+									"pm.environment.set(\"refreshToken\", responseJson.refreshToken);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"login"
+							]
+						},
+						"description": "Autentica a un usuario y devuelve un token de acceso y un token de refresco. Los tokens se guardan en variables de entorno."
+					},
+					"response": []
+				},
+				{
+					"name": "GET /me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/me",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+								"port": "3001",
+							"path": [
+								"me"
+							]
+						},
+						"description": "Obtiene la información del usuario autenticado (email, rol, permisos)."
+					},
+					"response": []
+				},
+				{
+					"name": "GET /refresh-token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Response has new accessToken\", function () {",
+									"    pm.expect(responseJson.accessToken).to.be.a('string');",
+									"});",
+									"// Opcional: Si el refreshToken se renueva, guardarlo también",
+									"if (responseJson.refreshToken) {",
+									"    pm.environment.set(\"refreshToken\", responseJson.refreshToken);",
+									"}",
+									"pm.environment.set(\"accessToken\", responseJson.accessToken); // Actualizar siempre el accessToken"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "refresh-token",
+								"value": "{{refreshToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/refresh-token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"refresh-token"
+							]
+						},
+						"description": "Renueva el `accessToken` usando el `refreshToken`."
+					},
+					"response": []
+				},
+				{
+					"name": "GET /can-do/:permission",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/can-do/roles_read",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"can-do",
+								"roles_read"
+							]
+						},
+						"description": "Verifica si el usuario autenticado tiene un permiso específico."
+					},
+					"response": []
+				},
+				{
+					"name": "POST /users (Admin Create User)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"newadminuser@example.com\",\n    \"password\": \"StrongPassword123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"users"
+							]
+						},
+						"description": "Endpoint para que un administrador cree un nuevo usuario. Requiere el permiso `roles_create`."
+					},
+					"response": []
+				},
+				{
+					"name": "GET /users/:userId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/users/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"users",
+								"1"
+							]
+						},
+						"description": "Obtiene la información de un usuario por su ID. Requiere el permiso `roles_read`."
+					},
+					"response": []
+				},
+				{
+					"name": "GET /users (List All Users)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"users"
+							]
+						},
+						"description": "Lista todos los usuarios en el sistema. Requiere el permiso `roles_read`."
+					},
+					"response": []
+				},
+				{
+					"name": "PATCH /users/:userId/assign-role",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roleName\": \"admin\" \n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/users/1/assign-role",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"users",
+								"1",
+								"assign-role"
+							]
+						},
+						"description": "Asigna un único rol a un usuario específico por su ID. Requiere el permiso `roles_update`."
+					},
+					"response": []
+				},
+				{
+					"name": "PATCH /users/:userId (Update User)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"updated.user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/users/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"users",
+								"1"
+							]
+						},
+						"description": "Actualiza la información de un usuario por su ID. Requiere el permiso `roles_update`."
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE /users/:userId",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/users/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"users",
+								"1"
+							]
+						},
+						"description": "Elimina un usuario por su ID. Requiere el permiso `roles_delete`."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Roles",
+			"item": [
+				{
+					"name": "POST /roles",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"admin\",\n    \"description\": \"Administrator role with universal create, read, update, delete capabilities\",\n    \"permissionCodes\": [\n        \"roles_create\", \n        \"roles_read\",   \n        \"roles_update\", \n        \"roles_delete\", \n        \"users_assign_roles\"\n    ]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/roles",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"roles"
+							]
+						},
+						"description": "Crea un nuevo rol. Requiere el permiso `roles_create`. Ejemplo: un rol 'admin' con permisos para todas las acciones."
+					},
+					"response": []
+				},
+				{
+					"name": "GET /roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/roles",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"roles"
+							]
+						},
+						"description": "Lista todos los roles. Requiere el permiso `roles_read`."
+					},
+					"response": []
+				},
+				{
+					"name": "GET /roles/:id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/roles/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"roles",
+								"1"
+							]
+						},
+						"description": "Obtiene un rol por su ID. Requiere el permiso `roles_read`."
+					},
+					"response": []
+				},
+				{
+					"name": "PATCH /roles/:id",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Updated role description\",\n    \"permissionCodes\": [\"roles_read\", \"roles_update\"]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/roles/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"roles",
+								"1"
+							]
+						},
+						"description": "Actualiza un rol existente. Requiere el permiso `roles_update`."
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE /roles/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/roles/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"roles",
+								"1"
+							]
+						},
+						"description": "Elimina un rol por su ID. Requiere el permiso `roles_delete`."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Permisos",
+			"item": [
+				{
+					"name": "POST /permissions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"new_permission\",\n    \"description\": \"Description for new permission\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/permissions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"permissions"
+							]
+						},
+						"description": "Crea un nuevo permiso. Requiere el permiso `roles_create` (reinterpretado para crear cualquier recurso)."
+					},
+					"response": []
+				},
+				{
+					"name": "GET /permissions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/permissions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"permissions"
+							]
+						},
+						"description": "Lista todos los permisos. Requiere el permiso `roles_read` (reinterpretado para leer cualquier recurso)."
+					},
+					"response": []
+				},
+				{
+					"name": "GET /permissions/:id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/permissions/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"permissions",
+								"1"
+							]
+						},
+						"description": "Obtiene un permiso por su ID. Requiere el permiso `roles_read` (reinterpretado para leer cualquier recurso)."
+					},
+					"response": []
+				},
+				{
+					"name": "PATCH /permissions/:id",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Updated description for the permission\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/permissions/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"permissions",
+								"1"
+							]
+						},
+						"description": "Actualiza un permiso existente. Requiere el permiso `roles_update` (reinterpretado para actualizar cualquier recurso)."
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE /permissions/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3001/permissions/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"permissions",
+								"1"
+							]
+						},
+						"description": "Elimina un permiso por su ID. Requiere el permiso `roles_delete` (reinterpretado para eliminar cualquier recurso)."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3001",
+			"type": "string"
+		}
+	]
+}
